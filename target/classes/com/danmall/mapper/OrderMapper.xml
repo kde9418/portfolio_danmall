@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.danmall.mapper.OrderMapper">
+
+	<!-- 주문정보 -->
+	<insert id="order_add">
+		<!-- OrderVO vo의 odr_code에 값을 주기 위한 작업(동시성 보장 / DB마다 조금씩 작업방식이 다르다.) -->
+		<selectKey keyProperty="odr_code" resultType="long" order="BEFORE">
+			select seq_order_code.nextval from dual
+		</selectKey>
+	
+		insert into order_tbl(odr_code, mem_id, odr_name, odr_zipcode, odr_addr, odr_addr_d, odr_phone, odr_total_price)
+		values(#{odr_code}, #{mem_id}, #{odr_name}, #{odr_zipcode}, #{odr_addr}, #{odr_addr_d}, #{odr_phone}, #{odr_total_price})
+	</insert>
+	
+	<!-- 주문상세정보(주문내역) -->
+	<!-- 장바구니테이블에 있는 상품을 기반으로 상품상세테이블 데이터 삽입하기 -->
+	<insert id="orderDetail_add">
+		insert into order_detail_tbl(odr_code, pdt_num, odr_amount, odr_price)
+		select #{odr_code}, p.pdt_num, c.cart_amount, (p.pdt_price-(p.pdt_price*p.pdt_discount*0.01))
+		from cart_tbl c inner join product_tbl p
+		on c.pdt_num = p.pdt_num
+		where mem_id = #{mem_id}
+	</insert>
+	
+	<!-- 장바구니 전체 삭제 -->
+	<!-- cartMapper로 변경하기 -->
+	<delete id="delete_cartAll">
+		delete from cart_tbl where mem_id = #{mem_id}
+	</delete>
+	
+	<!-- 즉시구매 추가 -->
+	<!-- jsp에서 구매상품상세정보를 제공 받아서 상품상세테이블 데이터 삽입하기 -->
+	<insert id="orderDirect_add">
+		insert into order_detail_tbl(odr_code, pdt_num, odr_amount, odr_price)
+		values(#{odr_code}, #{pdt_num}, #{odr_amount}, #{odr_price})
+	</insert>
+	
+	<!-- sql: inclue목적으로 쓰일 때 사용된다. -->
+	<sql id="criteria">
+		<trim prefix="(" suffix=") and" prefixOverrides="OR">
+			<foreach item="type" collection="typeArr">
+				<trim prefix="OR">
+					<choose>
+						<when test="type == 'N'.toString()">
+							pdt_name like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'D'.toString()">
+							pdt_detail like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'C'.toString()">
+							pdt_company like '%' || #{keyword} || '%'
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+	
+	<!-- admin_주문목록 -->
+	<select id="orderInfo_list" resultType="com.danmall.domain.OrderVO">
+		<![CDATA[
+		select odr_code, mem_id, odr_name, odr_zipcode, odr_addr, odr_addr_d, odr_phone, odr_total_price, odr_date
+		from (select /*+ index_desc(order_tbl pk_odr_code) */
+		      rownum rn, odr_code, mem_id, odr_name, odr_zipcode, odr_addr, odr_addr_d, odr_phone, odr_total_price, odr_date
+		      from order_tbl
+		      where odr_code > 0 and 
+		]]>
+		
+		<include refid="criteria"></include>
+		
+		<![CDATA[
+		      rownum > 0 and rownum <= #{pageNum} * #{amount}
+		      )
+		where rn > (#{pageNum} - 1) * #{amount}
+		]]>
+	</select>
+	
+	<!-- admin_상품개수(페이징) -->
+	<select id="getTotalCountOrder" resultType="int">
+		select count(*) from order_tbl where
+		
+		<include refid="criteria"></include>
+		
+		<![CDATA[
+		odr_code > 0
+		]]>
+	</select>
+	
+	<!-- admin_주문상세목록-다은 -->
+	<select id="orderDetail_list" resultType="com.danmall.domain.OrderDetailListVO">
+		select od.odr_code, p.pdt_name, p.pdt_img, od.odr_amount, od.odr_price, od.odr_amount*od.odr_price as sum
+		from order_detail_tbl od inner join product_tbl p
+		on od.pdt_num = p.pdt_num
+		where od.odr_code = #{odr_code}
+	</select>
+	
+	<!-- admin_주문상세목록-강사님 -->
+	<select id="order_detail_list" resultType="com.danmall.domain.OrderDetailListVO">
+		select od.odr_code, od.pdt_num, od.odr_amount, od.odr_price, p.pdt_name, p.pdt_img
+		from order_detail_tbl od inner join product_tbl p
+		on od.pdt_num = p.pdt_num
+		where od.odr_code = #{odr_code}
+	</select>
+	
+	<!-- 회원별 주문목록 -->
+	<select id="order_list" resultType="com.danmall.dto.MemberOrderDTO">
+	<![CDATA[
+		select mem_id, pdt_num, odr_code, pdt_name, pdt_img, odr_price, odr_amount, odr_date
+		from (  select rownum rn, mem_id, pdt_num, odr_code, pdt_name, pdt_img, odr_price, odr_amount, odr_date
+		        from (  select rownum rn, o.mem_id, p.pdt_num, o.odr_code, p.pdt_name, p.pdt_img, d.odr_price, d.odr_amount, o.odr_date
+		                from order_tbl o
+		                    inner join order_detail_tbl d
+		                    on d.odr_code = o.odr_code
+		                    inner join product_tbl p
+		                    on p.pdt_num = d.pdt_num
+		                where o.mem_id = #{mem_id}
+		                order by o.odr_date desc
+		               )
+		        where rownum > 0 and  rownum <= #{cri.pageNum} * #{cri.amount}
+		      )
+		where rn > (#{cri.pageNum} - 1) * #{cri.amount}
+	]]>
+	</select>	
+	
+	<!-- 회원별 상품개수(페이징) -->
+	<select id="order_count" resultType="int">
+		select count(*) from order_tbl
+		where mem_id = #{mem_id} and
+		<![CDATA[
+		odr_code > 0
+		]]>
+	</select>
+	
+	<!--  -->
+	<select id="order_sale" resultType="com.danmall.dto.OrderSaleDTO">
+	<![CDATA[
+	select to_char(b.dt, 'YYYY-MM-DD') as hiredate, to_char(b.dt, 'DY') as day, nvl(a.cnt,0) as cnt
+from (
+        select to_char(hire_date, 'YYYY-MM-DD') as hiredate, count(*) as cnt
+        from employees
+        where hire_date between to_date(#{startDate}, 'YYYY-MM-DD') and to_date(#{endDate},'YYYY-MM-DD')
+        group by hire_date
+     ) a
+     ,
+     (
+         select to_date(#{startDate},'YYYY-MM-DD') + level  - 1 as dt
+        from dual
+        connect by level <= (to_date(#{endDate},'YYYY-MM-DD') - to_date(#{startDate},'YYYY-MM-DD')+ 1)
+     ) b
+where b.dt = a.hiredate(+)
+order by b.dt
+]]>
+	</select>
+	
+
+</mapper>

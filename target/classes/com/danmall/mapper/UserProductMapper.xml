@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.danmall.mapper.UserProductMapper">
+
+	<!-- 1차 카테고리 -->
+	<select id="getCategoryList" resultType="com.danmall.domain.CategoryVO">
+		select cg_code, cg_code_prt, cg_name from category_tbl
+		where cg_code_prt is null
+	</select>
+	
+	<!-- 2차 카테고리 -->
+	<select id="getSubCategoryList" resultType="com.danmall.domain.CategoryVO">
+		select cg_code, cg_code_prt, cg_name from category_tbl
+		where cg_code_prt = #{cg_code}
+	</select>
+	
+	<!-- 2차 카테고리에 해당하는 상품목록 -->
+	<select id="getProductListBySubCate" resultType="com.danmall.dto.ProductDTO">
+		<![CDATA[
+		select pdt_num, cg_code, cg_code_prt, pdt_name, pdt_price, pdt_discount, pdt_consumer, pdt_company, 
+		       pdt_detail, pdt_img, pdt_amount, pdt_buy
+		from (select /*+ index_desc(product_tbl pk_pdt_num) */ 
+		      rownum rn, pdt_num, cg_code, cg_code_prt, pdt_name, pdt_price, pdt_discount, (pdt_price-(pdt_price*pdt_discount*0.01)) as pdt_consumer, pdt_company, 
+		            pdt_detail, pdt_img, pdt_amount, pdt_buy
+		      from product_tbl where pdt_num > 0 and cg_code = #{cg_code} and
+			  rownum <= #{cri.pageNum} * #{cri.amount})
+			  where rn > (#{cri.pageNum} - 1) * #{cri.amount}
+		]]>
+	</select>
+	
+	<select id="getTotalCountProductBySubCate" resultType="int">
+	
+		select count(*) from product_tbl where pdt_num > 0 and cg_code = #{cg_code}
+		
+	</select>
+	
+	<!-- 상품 상세설명 -->
+	<select id="getProductByNum" resultType="com.danmall.dto.ProductDTO">
+		select pdt_num, cg_code, cg_code_prt, pdt_name, pdt_price, pdt_discount, (pdt_price-(pdt_price*pdt_discount*0.01)) as pdt_consumer, pdt_company, 
+				pdt_detail, pdt_img, pdt_amount, pdt_buy
+		from product_tbl
+		where pdt_num = #{pdt_num}
+	</select>
+
+</mapper>

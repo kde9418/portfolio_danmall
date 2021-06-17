@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.danmall.mapper.MemberMapper">
+
+	<!-- 아이디 중복 체크 -->
+	<select id="checkIdDuplicate" resultType="int">
+		select count(*)
+		from member_tbl
+		where mem_id = #{mem_id}
+	</select>
+	
+	<!-- 로그인 인증 -->
+	<select id="login_ok" resultType="com.danmall.domain.MemberVO">
+		select mem_id, mem_name, mem_pw, mem_email, mem_sex, mem_zipcode, mem_addr, mem_addr_d, mem_phone,
+				mem_accept_e, mem_accept_p, mem_point, mem_date_sub, mem_date_up, mem_date_last 
+		from member_tbl
+		where mem_id = #{mem_id}
+	</select>
+	
+	<!-- 회원가입 -->
+	<insert id="join">
+		insert into member_tbl(mem_id, mem_name, mem_pw, mem_email, mem_sex, mem_zipcode, 
+			mem_addr, mem_addr_d, mem_phone, mem_accept_e, mem_accept_p)
+		values(#{mem_id}, #{mem_name}, #{mem_pw}, #{mem_email}, #{mem_sex}, #{mem_zipcode},
+			#{mem_addr}, #{mem_addr_d}, #{mem_phone}, #{mem_accept_e}, #{mem_accept_p})
+	</insert>
+	
+	<!-- 회원수정 폼 -->
+	<select id="member_info" resultType="com.danmall.domain.MemberVO">
+		select mem_id, mem_name, mem_pw, mem_email, mem_sex, mem_zipcode, mem_addr, mem_addr_d, mem_phone,
+				mem_accept_e, mem_accept_p, mem_point, mem_date_sub, mem_date_up, mem_date_last  
+		from member_tbl
+		where mem_id = #{mem_id}
+	</select>
+	
+	<!-- 회원수정 저장 -->
+	<update id="modifyPOST">
+		update member_tbl
+		    set mem_sex = #{mem_sex}
+		    ,   mem_email = #{mem_email}
+		    ,   mem_zipcode = #{mem_zipcode}
+		    ,   mem_addr = #{mem_addr}
+		    ,   mem_addr_d = #{mem_addr_d}
+		    ,   mem_phone = #{mem_phone}
+		    ,   mem_accept_e = #{mem_accept_e}
+		    ,   mem_accept_p = #{mem_accept_p}
+		    ,   mem_date_up = sysdate
+		where mem_id = #{mem_id}
+	</update>
+	
+	<!-- 아이디 찾기 -->
+	<select id="find_id" resultType="string">
+		select mem_id from member_tbl where mem_name = #{mem_name} and mem_email = #{mem_email}
+	</select>
+	
+	<!-- 비밀번호 찾기 -->
+	<select id="find_pw" resultType="com.danmall.domain.MemberVO">
+		select * from member_tbl where mem_id = #{mem_id} and mem_name = #{mem_name}
+	</select>
+	
+	<!-- 임시비밀번호 저장 -->
+	<update id="tmp_pw">
+		update member_tbl 
+			set mem_pw = #{mem_pw} 
+		where mem_id = #{mem_id}
+	</update>
+	
+	<!-- 비밀변호 변경 -->
+	<update id="pwUpdate">
+		update member_tbl 
+			set mem_pw = #{mem_pw} 
+		where mem_id = #{mem_id}
+	</update>
+	
+	<!-- 회원 탈퇴 -->
+	<delete id="delete_member">
+		delete from member_tbl where mem_id = #{mem_id}
+	</delete>
+	
+	<!-- VO클래스 필드와 테이블컬럼명이 다른 경우 -->
+	<resultMap type="com.danmall.domain.UserInfoVO" id="userinfo">
+		
+		<!-- mem_id, mem_name, mem_pw, mem_email, mem_zipcode, mem_addr, mem_addr_d, 
+		mem_phone, mem_accept_e, mem_accept_p, mem_point, mem_date_sub, mem_date_up, mem_date_last -->
+		
+		<id property="user_id" column="mem_id" /> <!-- primary key 사용 -->
+		<result property="user_id" column="mem_id" />
+		<result property="user_name" column="mem_name" />
+		<result property="user_pw" column="mem_pw" />
+		<result property="user_sex" column="mem_sex" />
+		<result property="user_email" column="mem_email" />
+		<result property="user_zipcode" column="mem_zipcode" />
+		<result property="user_addr" column="mem_addr" />
+		<result property="user_addr_d" column="mem_addr_d" />
+		<result property="user_phone" column="mem_phone" />
+		<result property="user_accept_e" column="mem_accept_e" />
+		<result property="user_accept_p" column="mem_accept_p" />
+		<result property="user_point" column="mem_point" />
+		<result property="user_date_sub" column="mem_date_sub" />
+		<result property="user_date_up" column="mem_date_up" />
+		<result property="user_date_last" column="mem_date_last" />
+		
+	</resultMap>
+	
+	<select id="userinfo_list" resultMap="userinfo">
+		select mem_id, mem_name, mem_pw, mem_email, mem_sex, mem_zipcode, mem_addr, mem_addr_d, mem_phone,
+				mem_accept_e, mem_accept_p, mem_point, mem_date_sub, mem_date_up, mem_date_last  
+		from member_tbl
+	</select>
+	
+</mapper>

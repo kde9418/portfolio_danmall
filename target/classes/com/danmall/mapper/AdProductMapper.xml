@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.danmall.mapper.AdProductMapper">
+
+	<!-- 1차 카테고리 -->
+	<select id="getCategoryList" resultType="com.danmall.domain.CategoryVO">
+		select cg_code, cg_code_prt, cg_name from category_tbl
+		where cg_code_prt is null
+	</select>
+	
+	<!-- 2차 카테고리 -->
+	<select id="getSubCategoryList" resultType="com.danmall.domain.CategoryVO">
+		select cg_code, cg_code_prt, cg_name from category_tbl
+		where cg_code_prt = #{cg_code}
+	</select>
+	
+	<!-- 상품 등록 -->
+	<insert id="product_insert">
+		insert into product_tbl(pdt_num, cg_code_prt, cg_code, pdt_name, pdt_price, pdt_discount, pdt_company, pdt_detail, pdt_img, pdt_amount, pdt_buy)
+		values(seq_pdt_num.nextval, #{cg_code_prt}, #{cg_code}, #{pdt_name}, #{pdt_price}, #{pdt_discount}, #{pdt_company}, #{pdt_detail}, #{pdt_img}, #{pdt_amount}, #{pdt_buy})
+	</insert>
+
+	<!-- 상품수정하기 -->
+	<update id="product_modifyOk">
+		update product_tbl
+			set cg_code_prt = #{cg_code_prt},
+				cg_code = #{cg_code},
+				pdt_name = #{pdt_name},
+				pdt_price = #{pdt_price},
+				pdt_discount = #{pdt_discount},
+				pdt_company = #{pdt_company},
+				pdt_detail = #{pdt_detail},
+				pdt_img = #{pdt_img},
+				pdt_amount = #{pdt_amount},
+				pdt_buy = #{pdt_buy},
+				pdt_date_up = sysdate
+		where pdt_num = #{pdt_num}
+	</update>
+	
+	<!-- 상품수정하기 -->
+	<update id="product_buy_modify">
+		update product_tbl
+			set pdt_buy = #{pdt_buy}
+		where pdt_num = #{pdt_num}
+	</update>
+	
+	<!-- sql: inclue목적으로 쓰일 때 사용된다. -->
+	<sql id="criteria">
+		<trim prefix="(" suffix=") and" prefixOverrides="OR">
+			<foreach item="type" collection="typeArr">
+				<trim prefix="OR">
+					<choose>
+						<when test="type == 'N'.toString()">
+							pdt_name like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'D'.toString()">
+							pdt_detail like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'C'.toString()">
+							pdt_company like '%' || #{keyword} || '%'
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+	
+	<!-- 상품 리스트 -->
+	<select id="product_list" resultType="com.danmall.domain.ProductVO">
+		<![CDATA[
+		select pdt_num, cg_code, cg_code_prt, pdt_name, pdt_price, pdt_discount, pdt_company, 
+		       pdt_detail, pdt_img, pdt_amount, pdt_buy, pdt_date_sub, pdt_date_up
+		from (select /*+ index_desc(product_tbl pk_pdt_num) */ 
+		      rownum rn, pdt_num, cg_code, cg_code_prt, pdt_name, pdt_price, pdt_discount, pdt_company, 
+		            pdt_detail, pdt_img, pdt_amount, pdt_buy, pdt_date_sub, pdt_date_up
+		      from product_tbl where pdt_num > 0 and 
+		]]>
+			<include refid="criteria"></include>
+		<![CDATA[
+			  rownum <= #{pageNum} * #{amount}
+			  )
+		where rn > (#{pageNum} - 1) * #{amount}
+		]]>
+	</select>
+
+	<!-- 상품개수(페이징) -->
+	<select id="getTotalCountProduct" resultType="int">
+		select count(*) from product_tbl where
+			<include refid="criteria"></include>
+		<![CDATA[
+		pdt_num > 0
+		]]>
+	</select>
+	
+	<!-- 상품수정 폼 -->
+	<select id="product_modify" resultType="com.danmall.domain.ProductVO">
+		select * from product_tbl where pdt_num = #{pdt_num}
+	</select>
+	
+	<!-- 상품 삭제하기 -->
+	<delete id="product_deleteOk">
+		delete from product_tbl where pdt_num = #{pdt_num}
+	</delete>
+
+
+</mapper>

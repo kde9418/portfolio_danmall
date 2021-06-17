@@ -1,0 +1,29 @@
+	footer{
+		font-size: small;
+		padding-top: 15px;
+	}
+	
+	.main-footer{
+		background-color: #ffde4d;
+	}
+	
+	.main-footer-links-list-lg{
+		list-style:none;
+	
+	}
+	
+	.main-footer-links-list-lg li{
+		display: inline-block;
+		margin: -2.9px;
+		margin-right: 30px;
+		list-style: none;
+		
+	}
+	
+	.main-footer-links-list-lg li a{
+		color: black;
+	}
+	
+	footer p{
+		margin-bottom: 5px;
+	}
