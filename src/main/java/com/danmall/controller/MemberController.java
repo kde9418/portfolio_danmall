@@ -153,6 +153,32 @@ public class MemberController {
 		return entity;
 	}
 	
+	/* 이메일 중복체크(ajax요청)   /member/checkEmail  */
+	@ResponseBody
+	@PostMapping("/checkEmail")
+	public ResponseEntity<String> checkEmail(@RequestParam("mem_email") String mem_email) throws Exception {
+		
+		log.info("email check");
+		
+		ResponseEntity<String> entity = null;
+		try {
+			int count = service.checkEmail(mem_email);
+			// count 가 0이면 아이디 사용가능, 1 이면 사용 불가능.
+			
+			if(count != 0) {
+				// 아이디가 존재해서 사용이 불가능.
+				entity = new ResponseEntity<String>("FAIL", HttpStatus.OK);
+			} else {
+				// 사용가능한 아이디
+				entity = new ResponseEntity<String>("SUCCESS", HttpStatus.OK);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+			entity = new ResponseEntity<String>(HttpStatus.BAD_REQUEST); // 요청이 문제가 있다.
+		}
+		return entity;
+	}
+	
 	/* 
 	 * 이메일 인증 코드 확인   // /member/checkAuthcode
 	 * - 입력된 인증 코드와 세션에 저장해 두었던 인증 코드가 일치하는지 확인
@@ -395,7 +421,11 @@ public class MemberController {
 		return entity;
 	}
 	
-	
+	// 마이페이지_QnA
+	@GetMapping("/mypage/my_qna")
+	public void my_qna(Model model) {
+		model.addAttribute("navActive", "myQna");
+	}
 	
 	
 	

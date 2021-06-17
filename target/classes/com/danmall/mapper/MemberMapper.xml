@@ -9,6 +9,13 @@
 		where mem_id = #{mem_id}
 	</select>
 	
+	<!-- 이메일 중복 체크 -->
+	<select id="checkEmail" resultType="int">
+		select count(*)
+		from member_tbl
+		where mem_email = #{mem_email}
+	</select>
+	
 	<!-- 로그인 인증 -->
 	<select id="login_ok" resultType="com.danmall.domain.MemberVO">
 		select mem_id, mem_name, mem_pw, mem_email, mem_sex, mem_zipcode, mem_addr, mem_addr_d, mem_phone,

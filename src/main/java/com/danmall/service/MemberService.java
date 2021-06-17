@@ -11,6 +11,9 @@ public interface MemberService {
 	// 아이디 중복체크
 	public int checkIdDuplicate(String mem_id) throws Exception;
 	
+	// 이메일 중복체크
+	public int checkEmail(String mem_email) throws Exception;
+	
 	// 로그인
 	public MemberVO login_ok(LoginDTO dto) throws Exception;
 	

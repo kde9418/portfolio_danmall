@@ -42,8 +42,39 @@ $(document).ready(function() {
 			}
 		});
 	});
+
+	/* 이메일 중복체크 클릭 시 */
+	$("#btn_checkEmail").on("click", function(){
+		
+		if($("#mem_email").val()=="" || $("#mem_email").val()== null){
+			$("#authcode_status").html("이메일을 먼저 입력해주세요.");
+			return;
+		}		
+		
+		var mem_email = $("#mem_email").val();
+		
+		$.ajax({
+			url: '/member/checkEmail',
+			type: 'post',
+			dataType: 'text',
+			data: {mem_email : mem_email},
+			success : function(data){
+				if(data== 'SUCCESS'){
+					// 사용 가능한 메일
+					$("#authcode_status").css("color", "blue");
+					$("#authcode_status").html("사용가능한 이메일 입니다.");
+					
+					isCheckEmail = "true";  // 아이디 중복체크를 한 용도
+				} else {
+					// 사용 불가능 - 이미 존재하는 이메일
+					$("#authcode_status").css("color", "red");
+					$("#authcode_status").html("이미 존재하는 이메일입니다. \n다시 시도해주세요.");
+				}
+			}
+		});
+	});
 	
-	
+	// AWS에서는 작동 안함
 	/* 이메일 인증 클릭 시 */
 	$("#btn_sendAuthCode").on("click", function(){
 	

@@ -65,10 +65,15 @@
 								<label for="InputEmail">* 이메일 주소</label><br /> <input type="email"
 									class="form-control" id="mem_email" name="mem_email"
 									placeholder="이메일 주소를 입력해주세요"
-									style="max-width: 526px; width:calc(100% - 115px); margin-right: 5px; display: inline-block;">
+									style="max-width: 480px; width:calc(100% - 115px); margin-right: 5px; display: inline-block;">
+								<!-- AWS 배포시엔 [이메일 중복확인]으로 변경 526px
 								<button id="btn_sendAuthCode" class="btn btn-success" type="button" >이메일 인증</button>
+								-->
+								<button id="btn_checkEmail" class="btn btn-success" type="button" >이메일 중복확인</button>
 								<p id="authcode_status" style="color: red;"></p>
 							</div>
+								
+							<!-- AWS 배포시엔 [이메일 중복확인]으로 변경 -->
 							<!-- 이메일 인증 요청을 하고 , 성공적으로 진행이 되면, 아래 div태그가 보여진다. -->
 							<div id="email_authcode" class="form-group" style="display: none;">
 								<label for="inputAuthCode">* 이메일 인증코드</label><br /> 
@@ -78,6 +83,7 @@
 									style="max-width: 570px; width:calc(100% - 70px); margin-right: 5px; display: inline-block;" />
 								<button id="btn_checkAuthCode" class="btn btn-success" type="button" >확인</button>
 							</div>
+							
 							<div class="form-group">
 								<label>* 성별</label>
 								<label><input type="radio" name="mem_sex" value="M" style="margin-left: 20px;" checked>남자</label>
@@ -92,7 +98,7 @@
 								<label for="inputAddr">* 주소</label> <br />
 								
 								<input type="text" id="sample2_postcode" name="mem_zipcode" class="form-control" 
-									style="max-width: 510px; width:calc(100% - 128px); margin-right: 5px; display: inline-block;" placeholder="우편번호" readonly>
+									style="max-width: 495px; width:calc(100% - 128px); margin-right: 5px; display: inline-block;" placeholder="우편번호" readonly>
 								<input type="button" onclick="sample2_execDaumPostcode()" id="btn_postCode" class="btn btn-success" value="우편번호 찾기"><br>
 								<input type="text" id="sample2_address" name="mem_addr" class="form-control" 
 									placeholder="주소" style="max-width: 630px; margin:3px 0px;" readonly>

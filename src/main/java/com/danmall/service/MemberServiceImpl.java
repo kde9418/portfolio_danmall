@@ -26,6 +26,13 @@ public class MemberServiceImpl implements MemberService {
 		return mapper.checkIdDuplicate(mem_id);
 	}
 	
+	// 이메일 중복체크
+	@Override
+	public int checkEmail(String mem_email) throws Exception {
+		// TODO Auto-generated method stub
+		return mapper.checkEmail(mem_email);
+	}
+	
 	// 로그인
 	@Override
 	public MemberVO login_ok(LoginDTO dto) throws Exception {
