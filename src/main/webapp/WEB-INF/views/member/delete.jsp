@@ -22,12 +22,12 @@
 
 <main role="main" class="container">
 	<div class="wrapper">
-	<%@include file="/WEB-INF/views/common/mypage.jsp"%>
+	<%@include file="/WEB-INF/views/common/mypage_nav.jsp"%>
 		<%-- Main content --%>
 			<section class="content container-fluid" style="background-color: ivory;">
 				<div class="container" style="width: 70%; min-width: 900px; background-color: ivory; font-size: 14px;" >
 					<form id="deleteForm" action="/member/deletePost" method="post">
-						<div class="form-group">
+						<div class="form-group" style="width: 800px; padding: 5%;">
 							<p>[ <b style="color: orange;">${sessionScope.loginStatus.mem_name }</b> ] 님 정말 탈퇴하시겠습니까?</p>
 							<p>아래 현재 비밀번호를 입력해주세요.</p>
 							<input type="password" class="form-control" id="mem_pw" placeholder="현재 비밀번호를 입력해주세요."

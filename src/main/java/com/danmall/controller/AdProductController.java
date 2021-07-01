@@ -121,7 +121,7 @@ public class AdProductController {
 			// 현재 프로젝트의 서버 물리적 경로
 			
 			String uploadPath = req.getSession().getServletContext().getRealPath("/") + "resources\\upload\\";
-			//String uploadPath = "/usr/local/tomcat/tomcat-9/webapps/upload/";
+//			String uploadPath = "/usr/local/tomcat/tomcat-9/webapps/upload/";
 			
 			
 			if(new File(uploadPath).exists()) new File(uploadPath).mkdir();

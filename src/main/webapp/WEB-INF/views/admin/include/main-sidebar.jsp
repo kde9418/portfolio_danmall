@@ -99,6 +99,9 @@
 							</li>
 						</ul>
 					</li>
+					<li>
+						<a href="#"><i class="fa fa-link"></i> <span>Main화면 관리</span></a>
+					</li>
 				</ul>
 				</c:if>
 				<!-- /.sidebar-menu -->

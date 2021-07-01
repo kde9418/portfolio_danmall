@@ -2,9 +2,105 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.danmall.mapper.BoardMapper">
 
-	<insert id="board_insert">
-		insert into board_tbl(brd_num, mem_id, brd_title, brd_content, brd_date_reg)
-		values(seq_rv_num.nextval, #{mem_id}, #{brd_title}, #{brd_content}, #{brd_date_reg})
+	<!-- 상품문의 목록(제품별) -->
+	<select id="board_list" resultType="com.danmall.domain.BoardVO">
+		<![CDATA[
+		select brd_num, brd_cg, mem_id, pdt_num, brd_title, brd_content, brd_date_reg
+		from (select /*+ index_desc(board_tbl pk_brd_num) */
+		      rownum rn, brd_num, brd_cg, mem_id, pdt_num, brd_title, brd_content, brd_date_reg
+		      from board_tbl
+		      where pdt_num = #{pdt_num} and
+		      brd_num > 0 and rownum > 0 and rownum <= #{cri.pageNum} * #{cri.amount}
+		      )
+		where rn > (#{cri.pageNum} - 1) * #{cri.amount}
+		]]>
+	</select>
+	
+	<!-- 상품문의 댓글 개수(제품별) -->
+	<select id="board_cnt" resultType="int">
+		select count(*) from board_tbl where pdt_num = #{pdt_num}
+	</select>
+	
+	<!-- 상품문의 목록(회원별)에 검색기능 -->
+	<sql id="criteria">
+		<trim prefix="(" suffix=") and" prefixOverrides="OR">
+			<foreach item="type" collection="typeArr">
+				<trim prefix="OR">
+					<choose>
+						<when test="type == 'T'.toString()">
+							brd_title like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'C'.toString()">
+							brd_content like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'M'.toString()">
+							mem_id like '%' || #{keyword} || '%'
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+	
+	<!-- 상품문의 목록(회원별) -->
+	<select id="board_list_my" resultType="com.danmall.dto.BoardListDTO">
+		<![CDATA[
+			select brd_num, brd_cg, mem_id, pdt_num, pdt_name, brd_title, brd_content, brd_date_reg
+			from (select rownum rn, brd_num, brd_cg, mem_id, pdt_num, pdt_name, brd_title, brd_content, brd_date_reg
+			      from ( select rownum rn, b.brd_num, b.brd_cg, b.mem_id, b.pdt_num, p.pdt_name, b.brd_title, b.brd_content, b.brd_date_reg
+			             from board_tbl b
+			                inner join product_tbl p
+			                on b.pdt_num =p.pdt_num
+			             where b.mem_id = #{mem_id}
+			             order by b.brd_num desc
+			            )
+			      where rownum > 0 and  rownum <= #{cri.pageNum} * #{cri.amount}
+			      )
+			where rn > (#{cri.pageNum} - 1) * #{cri.amount}
+		]]>
+	</select>
+	
+	<!-- 상품문의 댓글 개수(회원별/페이징) -->
+	<select id="board_cnt_my" resultType="int">
+		select count(*)
+		from board_tbl
+		where mem_id = #{mem_id}
+	</select>
+	
+	<!-- 상품문의 상세조회 -->
+	<select id="board_detail_list" resultType="com.danmall.dto.BoardListDTO">
+		select b.brd_num, b.brd_cg, b.mem_id, b.pdt_num, p.pdt_name, b.brd_title, b.brd_content, b.brd_date_reg
+		from board_tbl b
+		inner  join product_tbl p
+		on b.pdt_num =p.pdt_num
+		where b.brd_num = #{brd_num}
+	</select>
+	
+	<!-- 상품문의 상세조회2 -->
+	<select id="board_detail_list2" resultType="com.danmall.dto.BoardListDTO">
+		select b.brd_num, b.brd_cg, b.mem_id, b.pdt_num, p.pdt_name, b.brd_title, b.brd_content, b.brd_date_reg
+		from board_tbl b
+		inner  join product_tbl p
+		on b.pdt_num =p.pdt_num
+		where b.brd_num = #{brd_num}
+	</select>
+	
+	<!-- 상품문의 등록 -->
+	<insert id="board_register">
+		insert into board_tbl(brd_num, brd_cg, mem_id, pdt_num, brd_title, brd_content)
+		values(seq_board_num.nextval, #{brd_cg}, #{mem_id}, #{pdt_num}, #{brd_title}, #{brd_content})
 	</insert>
+	
+	<!-- 상품문의 수정 -->
+	<update id="board_modify">
+		update board_tbl
+		set brd_title = #{brd_title}, brd_content = #{brd_content}
+		where brd_num = #{brd_num}	
+	</update>
+	
+	<!-- 상품문의 삭제 -->
+	<delete id="board_delete">
+		delete from board_tbl where brd_num = #{brd_num}
+	</delete>
 
 </mapper>

@@ -34,7 +34,7 @@
 
 <main role="main" class="container">
 	<div class="wrapper">
-	<%@include file="/WEB-INF/views/common/mypage.jsp"%>
+	<%@include file="/WEB-INF/views/common/mypage_nav.jsp"%>
 		<%-- Main content --%>
 			<section class="content container-fluid" style="background-color: ivory;">
 				<div class="container" style="width: 70%; min-width: 900px; background-color: ivory; font-size: 14px;" >
@@ -59,7 +59,9 @@
 								<label for="InputEmail">* 이메일 주소</label><br /> <input type="email"
 									class="form-control" id="mem_email" name="mem_email" value="<c:out value="${vo.mem_email }"/>"
 									placeholder="이메일 주소를 입력해주세요"
-									style="max-width: 526px; width:calc(100% - 115px); margin-right: 5px; display: inline-block;">
+									style="max-width: 480px; width:calc(100% - 115px); margin-right: 5px; display: inline-block;">
+								<button id="btn_checkEmail" class="btn btn-success" type="button" >이메일 중복확인</button>
+								<p id="authcode_status" style="color: red;"></p>
 							</div>
 							<!-- 이메일 인증 요청을 하고 , 성공적으로 진행이 되면, 아래 div태그가 보여진다.
 							<div id="email_authcode" class="form-group" style="display: none;">

@@ -129,12 +129,8 @@ desired effect
 		<!-- /.content-wrapper -->
 
 		<!-- Main Footer -->
-			<%@include file="/WEB-INF/views/admin/include/main-footer.jsp" %>
+		<%@include file="/WEB-INF/views/admin/include/main-footer.jsp" %>
 
-		
-		<!-- Add the sidebar's background. This div must be placed
-  immediately after the control sidebar -->
-		<div class="control-sidebar-bg"></div>
 	</div>
 	<!-- ./wrapper -->
 

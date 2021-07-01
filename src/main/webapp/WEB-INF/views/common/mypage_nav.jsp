@@ -14,6 +14,6 @@
 		<a class="nav-link <c:out value="${myActive == 'delete'? 'active' : '' }" />" href="/member/delete">회원탈퇴</a>
 	</li>
 	<li class="nav-item">
-		<a class="nav-link <c:out value="${myActive == 'myQna'? 'active' : '' }" />" href="/member/mypage/my_qna">1대1문의</a>
+		<a class="nav-link <c:out value="${myActive == 'board'? 'active' : '' }" />" href="/board/board_list">상품문의</a>
 	</li>
 </ul>

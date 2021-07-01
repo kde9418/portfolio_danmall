@@ -11,7 +11,7 @@
 <meta name="generator" content="Hugo 0.80.0">
 <meta name="theme-color" content="#563d7c">
 <%@include file="/WEB-INF/views/common/config.jsp" %>
-    
+
 <title>DAN_MALL</title>
 
 <!-- Custom styles for this template -->
@@ -26,7 +26,8 @@
 <main role="main" class="container">
 	<div class="wrapper">
 		<%-- Main content --%>
-		<%@include file="/WEB-INF/views/common/mypage.jsp"%>
+		<%@include file="/WEB-INF/views/common/mypage_nav.jsp"%>
+		<div style="padding-bottom: 350px"></div>
 		
 		<!-- /.content -->
 	</div>

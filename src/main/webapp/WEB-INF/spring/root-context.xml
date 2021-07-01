@@ -29,8 +29,8 @@
 		<property name="driverClassName" value="oracle.jdbc.OracleDriver" />
 		<property name="jdbcUrl" value="jdbc:oracle:thin:@mydemoserver.co2sb8ifrasi.ap-northeast-2.rds.amazonaws.com:1521:orcl" />
 		
-		<property name="username" value="d" />
-		<property name="password" value="e" />-->
+		<property name="username" value="daeun" />
+		<property name="password" value="ekdms" />-->
 		
 	</bean>
 	

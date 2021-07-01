@@ -31,12 +31,12 @@
 
 <main role="main" class="container">
 	<div class="wrapper">
-	<%@include file="/WEB-INF/views/common/mypage.jsp"%>
+	<%@include file="/WEB-INF/views/common/mypage_nav.jsp"%>
 		<%-- Main content --%>
 		<section class="content container-fluid" style="background-color: ivory;">
 				<div class="container" style="width: 70%; min-width: 900px; background-color: ivory; font-size: 14px;" >
 					<form id="pwUpdateForm" action="/member/pwUpdatePost" method="post">
-						<div class="form-group">
+						<div class="form-group" style="width: 800px; padding: 5%;">
 							<label for="mem_pw">* 기존 비밀번호</label>
 							<input type="password" class="form-control" id="mem_pw" placeholder="기존 비밀번호를 입력해주세요."
 								style="max-width: 630px;">

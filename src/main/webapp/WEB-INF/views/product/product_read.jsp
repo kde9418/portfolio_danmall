@@ -35,6 +35,8 @@
 
 <!-- config.jsp -->
 <%@include file="/WEB-INF/views/common/config.jsp" %>
+<!-- Custom styles for this template -->
+<link href="/resources/footer.css" rel="stylesheet">
 
 <!-- 1)handlebars.js 참조 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.1/handlebars.js"></script>
@@ -65,6 +67,32 @@
 </table>
 </script>
 
+<!-- 2)UI Template(상품문의 목록 템플릿) -->
+<script id="boardTemplate" type="text/x-handlebars-template">
+<table class="table table-striped">
+	<thead>
+		<tr>
+		<th scope="col">번호</th>
+		<th scope="col">문의유형</th>
+		<th scope="col">제목</th>
+		<th scope="col">작성자</th>
+		<th scope="col">작성일</th>
+		</tr>
+	</thead>
+	<tbody>
+	{{#each .}}
+		<tr>
+			<td data-brd_num="{{brd_num}}">{{brd_num}}</td>
+			<td data-brd_cg="{{brd_cg}}">{{brd_cg}}</td>
+			<td data-brd_title="{{brd_title}}">{{brd_title}}</td>
+			<td data-mem_id="{{mem_id}}">{{mem_id}}</td>
+			<td data-brd_date_reg="{{displayTime brd_date_reg}}">{{displayTime brd_date_reg}}</td>
+		</tr>
+	{{/each}}
+	</tbody>
+</table>
+</script>
+
 <script>
 	// 3) 상품후기 목록데이터 출력작업
 	var printReviewData = function(reviewData, reviewTarget, reviewTemplate){
@@ -74,7 +102,15 @@
 			
 			reviewTarget.html(reviewDataResult);
 		}
+	
+	// 상품문의 목록데이터 출력작업
+	var printBoardData = function(boardData, boardTarget, boardTemplate){
+			var uiTemplate = Handlebars.compile(boardTemplate.html());
 
+			var boardDataResult = uiTemplate(boardData);
+			
+			boardTarget.html(boardDataResult);
+		}
 	
 
 	// 상품후기 목록 페이징 구현작업
@@ -126,6 +162,53 @@
 
 		
 		$("#reviewPaging").html(str);
+
+	}
+	
+	var printBoardPaging = function(replyCnt, pageNum){
+		
+		var displayPageCount = 5;
+		
+		// 페이징 알고리즘
+		var endNum = Math.ceil(pageNum / 10.0) * 10; // 10의 의미는 출력될 페이지 수(pageSize)
+		var startNum = endNum - 9;
+
+		var prev = startNum != 1;
+		var next = false;
+
+		// 마지막페이지 번호 * 10개 => 총 데이터 개수(실제)
+		if(endNum * displayPageCount >= replyCnt){
+			endNum = Math.ceil(replyCnt/parseFloat(displayPageCount)); // 실제 데이터를 이용한 전체 페이지 수
+		}
+
+		// 실제 데이터가 마지막 페이지 번호*10보다 크면, 다음 데이터를 표시하기 위하여 next = true로 해줘야 한다.
+		if(endNum * displayPageCount < replyCnt){
+			next = true;
+		}
+
+		var str = '<ul class="pagination">';
+
+		// 이전표시여부
+		if(prev){
+			str += '<li class="page-item"><a class="page-link" href="' + (startNum - 1) + '">Previous</a></li>';
+		}
+		// 페이지번호 출력
+		for(var i=startNum; i<= endNum; i++){
+			var active = pageNum == i ? "active":""; // 현재페이지 상태를 나타내는 스타일시트 적용
+
+			str += '<li class="page-item ' + active + ' "><a class="page-link" href="' + i + '">' + i + '</a></li>';
+		}
+		// 다음표시여부
+		if(next){
+			str += '<li class="page-item"><a class="page-link" href="' + (endNum + 1) + '">Next</a></li>';
+		}
+
+		str += '</ul>';
+
+		console.log(str);
+
+		
+		$("#boardPaging").html(str);
 
 		//페이징정보 표시
 	}
@@ -229,15 +312,78 @@
 					</div>
 				</div>
 			</div>
+			
+			<hr style="margin: 60px 0px">
+
+			<!-- 상품문의 목록 -->
+			<div class="row">
+				<div class="col">
+		    		<div class="panel panel-default">
+		    			<div class="panel-heading text-center">
+		    			<h3 style="margin-bottom: 20px;">상품문의</h3>
+		    			</div>
+		    			<div class="container">
+							<div class="panel-body">
+								<button type="button" id="btnBoard" class="btn btn-primary">상품문의 작성</button>
+							</div>
+							<!-- 상품문의 목록위치 -->
+							<div class="panel-body text-center" id="boardListView">
+								<div id="boardNone">
+									<h5>상품문의가 없습니다.</h5>
+								</div>
+							</div>
+							<!-- 상품문의 위치 -->
+							<div class="panel-footer" id="boardPaging"></div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
-	
-
 </main><!-- /.container -->
+
+<!-- 상품후기 모달대화상자 : 후기쓰기, 후기수정, 후기삭제 -->
+<div class="modal fade" id="boardModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h5 class="modal-title" id="modalLabel">상품문의</h5>
+		  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="modal-body">
+		  <label for="brd_cg">문의유형</label><br>
+		  <label><input type="radio" name="brd_cg" value="상품" style="margin-left: 10px;" checked="checked">상품</label>
+		  <label><input type="radio" name="brd_cg" value="배송" style="margin-left: 10px;">배송</label>
+		  <label><input type="radio" name="brd_cg" value="교환" style="margin-left: 10px;">교환</label>
+		  <label><input type="radio" name="brd_cg" value="반품" style="margin-left: 10px;">반품</label>
+		  <label><input type="radio" name="brd_cg" value="기타" style="margin-left: 10px;">기타</label>
+		</div>
+		<div class="modal-body">
+		  <div class="form-group">
+			  <label>상품문의 제목</label>
+			  <textarea class="form-control" name="brd_title" id="brd_title"></textarea>
+		  </div>
+		  <div class="form-group">
+			  <label>상품문의 내용</label>
+			  <textarea class="form-control" name="brd_content" id="brd_content"></textarea>
+		  </div>
+		</div>
+		<div class="modal-footer">
+		  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+		  <button type="button" id="btnBoardAdd" class="btn btn-primary btnModal">상품문의 등록</button>
+		</div>
+	  </div>
+	</div>
+  </div>
+
+<%@include file="/WEB-INF/views/common/footer.jsp" %>
 
 <script>
 	$(document).ready(function(){
 
+		// 장바구니 담기
 		$("#btnCart").on("click", function(){
 			//console.log("장바구니 test");
 
@@ -267,6 +413,7 @@
 
 		});
 
+		// 즉시구매
 		$("#btnDirectBuy").on("click", function(){
 			console.log("즉시구매 test");
 
@@ -278,7 +425,45 @@
 			order_direct_form.append("<input type='hidden' name='odr_amount' value='"+ odr_amount + "'>");
 
 			order_direct_form.submit();
+		});
+
+		// 상품문의 Modal
+		$("#btnBoard").on("click", function(){
+
+			$("#boardModal").modal("show");
 			
+		});
+
+		// 상품문의 등록 btnBoardAdd
+		$("#btnBoardAdd").on("click", function(){
+			var brd_cg = $('input[name="brd_cg"]:checked').val();
+			var pdt_num = ${productDTO.pdt_num };
+			var brd_title = $("#brd_title").val();
+			var brd_content = $("#brd_content").val();
+
+			console.log(brd_cg);
+			console.log(pdt_num);
+			console.log(brd_title);
+			console.log(brd_content);
+
+			$.ajax({
+			url: "/board/board_register",
+			type: "post",
+			data: {brd_cg : brd_cg, pdt_num : pdt_num, brd_title : brd_title, brd_content : brd_content},
+			dataType: "text",
+			success : function(data){
+				if(data == "SUCCESS"){
+					alert("상품문의가 등록되었습니다.");
+					$("#brd_title").val("");
+					$('input[name="brd_cg"]').val("상품");
+					$("#brd_content").val("");
+					$("#boardModal").modal("hide");
+
+					location.href = "/product/product_read?pdt_num=" + pdt_num;
+				}				
+			}
+			});
+
 		});
 	});
 	
@@ -312,13 +497,43 @@
 			}
 	
 		});
-	
-		
 	}
 	
 	var curPage = 1;
 	
 	showReviewList(curPage);
+	
+	// 상품후기 목록/페이징 기능
+	var showBoardList = function(curPage){
+		
+		//상품코더
+		let pdt_num = ${productDTO.pdt_num};
+		let page = curPage;
+		
+		console.log(pdt_num);
+		
+		let url = "/board/pages/" + pdt_num + "/" + page;
+		console.log(url);
+	
+		
+		$.getJSON(url, function(data){
+			
+			if(data.list.length == 0){
+				$("#boardNone").show();
+			} else{
+				$("#boardNone").hide();
+				// 1) 상품후기 목록 출력
+				printBoardData(data.list, $("#boardListView"), $("#boardTemplate"));
+		
+				// 2) 페이징 출력
+				printBoardPaging(data.boardCnt, page);
+			}
+	
+		});
+	}
+	
+	showBoardList(curPage);	
+
 </script>
 
 <script>
@@ -384,6 +599,15 @@
 
 			curPage = $(this).attr("href");
 			showReviewList(curPage);
+		});
+		
+		$("#boardPaging").on("click", "li.page-item a", function(e){
+			e.preventDefault();
+
+			console.log("페이지번호클릭");
+
+			curPage = $(this).attr("href");
+			showBoardList(curPage);
 		});
 		
 	});
